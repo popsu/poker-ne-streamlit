@@ -11,6 +11,8 @@ RANGE_INCREMENTS = 5
 
 # prob for random number in [u, 1] being bigger than in [b, 1]
 def u_win_prob(u, b):
+    if u > 1 or u < 0 or b > 1 or b < 0:
+        raise ValueError("u and b should be in [0, 1]")
     if u >= b:
         # The math is based on looking the prob mass function
         # of the combined random variables, so basically 2d geometry.
