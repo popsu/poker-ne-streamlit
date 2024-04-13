@@ -1,9 +1,10 @@
 import matplotlib.patches as patches
+from matplotlib.pylab import f
 import matplotlib.pyplot as plt
 import seaborn as sns
+import streamlit as st
+from graphviz import Digraph
 
-POT_SIZE = 3
-BET_SIZE = 2
 # RANGE_INCREMENTS x means we will have (100 / x) in the range
 # For example with 5 the values are [0, 0.05, 0.1, 0.15, ..., 0.95]
 RANGE_INCREMENTS = 5
@@ -65,32 +66,32 @@ def u_bet_b_call_b_win_prob(u, b):
     return u_bet * b_call * (1 - a_win)
 
 
-def btn_ev(u, b):
+def btn_ev(u, b, pot_size, bet_size):
     total_ev = 0
 
     # U fold
-    total_ev += u_fold_prob(u, b) * POT_SIZE
+    total_ev += u_fold_prob(u, b) * pot_size
     # U bet, B fold
     total_ev += u_bet_b_fold_prob(u, b) * 0
     # U bet, B call, U win
-    total_ev += u_bet_b_call_u_win_prob(u, b) * -BET_SIZE
+    total_ev += u_bet_b_call_u_win_prob(u, b) * -bet_size
     # U bet, B call, B win
-    total_ev += u_bet_b_call_b_win_prob(u, b) * (POT_SIZE + BET_SIZE)
+    total_ev += u_bet_b_call_b_win_prob(u, b) * (pot_size + bet_size)
 
     return total_ev
 
 
-def utg_ev(u, b):
+def utg_ev(u, b, pot_size, bet_size):
     total_ev = 0
 
     # U fold
     total_ev += u_fold_prob(u, b) * 0
     # U bet, B fold
-    total_ev += u_bet_b_fold_prob(u, b) * POT_SIZE
+    total_ev += u_bet_b_fold_prob(u, b) * pot_size
     # U bet, B call, U win
-    total_ev += u_bet_b_call_u_win_prob(u, b) * (POT_SIZE + BET_SIZE)
+    total_ev += u_bet_b_call_u_win_prob(u, b) * (pot_size + bet_size)
     # U bet, B call, B win
-    total_ev += u_bet_b_call_b_win_prob(u, b) * -BET_SIZE
+    total_ev += u_bet_b_call_b_win_prob(u, b) * -bet_size
 
     return total_ev
 
@@ -140,7 +141,7 @@ def get_range():
     return range(0, 100, RANGE_INCREMENTS)
 
 
-def create_heatmap():
+def create_heatmap(pot_size=1, bet_size=1):
     btn_evs = []
     for u_i in get_range():
         row_list = []
@@ -148,7 +149,7 @@ def create_heatmap():
 
         for b_i in get_range():
             b = b_i / 100
-            row_list.append(btn_ev(u, b))
+            row_list.append(btn_ev(u, b, pot_size, bet_size))
         btn_evs.append(row_list)
 
     btn_nes, utg_nes = get_possible_ne_points(btn_evs)
@@ -157,18 +158,22 @@ def create_heatmap():
 
     cmap = sns.color_palette("rocket")
 
-    ax = sns.heatmap(
+    fig, ax = plt.subplots(figsize=(20,10))
+
+    sns.heatmap(
         data=btn_evs,
-        vmin=0,
-        vmax=POT_SIZE,
+        # vmin=0,
+        # vmax=pot_size,
         xticklabels=axis_labels,
         yticklabels=axis_labels,
         annot=True,
         fmt=".3f",
         cmap=cmap,
+        ax=ax,
     )
 
     ax.invert_yaxis()
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=90)
     ax.set(xlabel="BTN minimum hand strength", ylabel="UTG minimum hand strength")
     cbar = ax.collections[0].colorbar
     cbar.set_label("BTN EV")
@@ -212,10 +217,60 @@ def create_heatmap():
         bbox_to_anchor=(1.15, 1),
         loc="upper left",
     )
-    plt.title(f"BTN EV for Pot size {POT_SIZE}, Bet size {BET_SIZE}")
+    plt.title(f"BTN EV for Pot size {pot_size}, Bet size {bet_size}")
 
-    plt.show()
+    return fig
+
+def graphviz_chart():
+    # Create a new directed graph
+    dot = Digraph(graph_attr={'rankdir':'LR'})
+
+    # Add nodes
+    dot.node('ua1', 'UTG choice')
+    dot.node('bw1', 'BTN wins', shape='box', style='filled', fillcolor='orange')
+    dot.node('uw1', 'UTG wins', shape='box', style='filled', fillcolor='lightblue')
+    dot.node('ba1', 'BTN choice')
+    dot.node('sd', 'Showdown')
+    dot.node('bw2', 'BTN wins', shape='box', style='filled', fillcolor='orange')
+    dot.node('uw2', 'UTG wins', shape='box', style='filled', fillcolor='lightblue')
+
+    # Add edges
+    dot.edge('ua1', 'bw1', label='Fold')
+    dot.edge('ua1', 'ba1', label='Bet')
+    dot.edge('ba1', 'uw1', label='Fold')
+    dot.edge('ba1', 'sd', label='Call')
+    dot.edge('sd', 'bw2', label='BTN has better hand')
+    dot.edge('sd', 'uw2', label='UTG has better hand')
+
+    return dot
+
+def run_st():
+    st.markdown("""
+                # Poker
+
+                This is very simplified poker game. The goal is to try to explain the concept of Nash Equilibrium in poker.
+
+                This game has 2 players: UTG (short for under-the-gun) and BTN (short for button). These terms are poker jargon and refer to the positions of the players at the table.
+
+                Players hands are represented as a number between 0 and 1. If there is a showdon, the player with the higher number wins the hand. For simplicity we assume the numbers cannot be equal.
+
+                Initially the pot has X chips in it.
+
+                UTG is the first to act and they can either fold or bet Z chips. If UTG folds, BTN wins the pot. If UTG bets, BTN can either fold or call and pay Z chips. If BTN folds, UTG wins the pot. If BTN calls, the players hands are compared and the player with the higher hand wins the pot and the chips that were bet.
+
+                The following chart shows the possible outcomes:
+                """)
+    gc = graphviz_chart()
+    st.graphviz_chart(gc)
+
+    col1, col2 = st.columns(2)
+
+    pot_size = col1.number_input("Pot size", min_value=1, max_value=10, value=1)
+    bet_size = col2.number_input("Bet size", min_value=1, max_value=10, value=1)
+
+    fig = create_heatmap(pot_size, bet_size)
+    st.pyplot(fig)
 
 
 if __name__ == "__main__":
-    create_heatmap()
+    run_st()
