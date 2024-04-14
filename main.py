@@ -246,13 +246,19 @@ def graphviz_chart():
 
 def run_st():
     st.markdown("""
-                # Poker
+                # Nash Equilibrium in Poker
 
-                This is very simplified poker game. The goal is to try to explain the concept of Nash Equilibrium in poker.
+                The goal is to try to explain the concept of Nash Equilibrium in poker. We will use a simplified version of the game of poker to illustrate the concept.
+
+                ## Nash Equilibrium
+
+                Nash Equilibrum is a concept in game theory. It states that in a game with 2 or more players, there is a set of strategies, one for each player, such that no player has anything to gain by changing only their own strategy. Such a set of strategies is called Nash Equilibrium. Every finite game has at least one Nash Equilibrium, and can have multiple.
+
+                ## Simplified poker game
 
                 This game has 2 players: UTG (short for under-the-gun) and BTN (short for button). These terms are poker jargon and refer to the positions of the players at the table.
 
-                Players hands are represented as a number between 0 and 1. If there is a showdon, the player with the higher number wins the hand. For simplicity we assume the numbers cannot be equal.
+                Players hands are represented as a number between 0 and 1. If there is a showdon, the player with the higher number wins the hand. For simplicity we assume the numbers cannot be equal, so no ties.
 
                 Initially the pot has X chips in it.
 
@@ -263,6 +269,18 @@ def run_st():
     gc = graphviz_chart()
     st.graphviz_chart(gc)
 
+    st.markdown("""
+                ## Expected Values (EV) for all strategy pairs
+
+                Both players want to maximize their expected winnings. The only thing they choose is what is the minimum hand strength they are willing to play with. For example if a player has strategy of playing every hand with strength 0.5 or higher, they will fold every hand with strength lower than 0.5.
+
+                We will calculate the expected value for BTN player for each possible strategy pair and plot these in a heatmap below. So BTN player wants to maximize this value and UTG minimize it, because the game is zero-sum game (technically there is some extra chips in the pot). You can change the Pot size and Bet size values to adjust calculations.
+
+                Because the heatmap only shows strategies in 0.05 increments, it might not always show the Nash Equilibrium point with certain bet size and pot size combinations. However the nash equilibrium still always exists.
+
+                The X axis is the minimum hand strength of the BTN player and the Y axis is the minimum hand strength of the UTG player. The red circles in the heatmap show the maximum value for each row. This is the best strategy for the BTN player IF UTG is player the strategy indicated by that row. Similarly the blue circle in the heatmap shows the minimum value for each column. This is the best strategy for the UTG player IF BTN is playing the strategy indicated by that column. The purple circle shows the Nash Equilibrium point, where that cell is both the maximum value in the row and minimum value in the column, so neither player has anything to gain by changing their strategy if the other player doesn't change theirs.
+                """)
+
     col1, col2 = st.columns(2)
 
     pot_size = col1.number_input("Pot size", min_value=1, max_value=10, value=1)
@@ -271,6 +289,15 @@ def run_st():
     fig = create_heatmap(pot_size, bet_size)
     st.pyplot(fig)
 
+    st.markdown("""
+                ## Exploiting
+
+                If you know the strategy of the other player (and it is not Nash Equilibrium), you could win more by playing non-Nash Equilibrium strategy yourself as well. This is called exploiting and is a big part of poker. The red and blue circles in the heatmap show the best exploit strategies for each player given the other player's strategy.
+
+                When you exploit someone, you are open to being exploited yourself. The only way to be sure to not get exploited is to play Nash Equilibrum strategy. You should only try to exploit players who are worse than you and play Nash Equilibrium strategy against better players.
+
+                Basically playing Nash Equilibrium is safe way to play and it maximizes the winning against perfect opponents. But against worse opponents you can win more by exploiting them, but you are also open to being exploited yourself.
+                """)
 
 if __name__ == "__main__":
     run_st()
