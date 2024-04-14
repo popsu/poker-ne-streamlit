@@ -299,5 +299,9 @@ def run_st():
                 Basically playing Nash Equilibrium is safe way to play and it maximizes the winning against perfect opponents. But against worse opponents you can win more by exploiting them, but you are also open to being exploited yourself.
                 """)
 
+    st.write(
+        "[Source code](https://github.com/popsu/poker-ne-streamlit)"
+    )
+
 if __name__ == "__main__":
     run_st()
