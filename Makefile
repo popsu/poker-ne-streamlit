@@ -7,3 +7,7 @@ help: ## This help
 
 st: ## Run streamlit
 	streamlit run main.py
+
+update-python-deps: ## Update python dependencies
+	pip list --outdated | cut -d ' ' -f1 | xargs -n1 pip install -U
+	pip freeze > requirements.txt
