@@ -7,7 +7,7 @@
 	"image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
 
 	// Use hardcoded docker container name, this is used in exec-devcontainer.sh script
-	"runArgs": ["--name", "poker_ne_streamlit_devcontainer"],
+	"runArgs": ["--name", "poker-ne-streamlit_devcontainer"],
 	"customizations": {
 		// Add your customizations here. See https://aka.ms/devcontainer.json for examples.
 		"vscode": {
