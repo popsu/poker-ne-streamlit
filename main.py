@@ -1,5 +1,4 @@
 import matplotlib.patches as patches
-from matplotlib.pylab import f
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
@@ -135,7 +134,6 @@ def get_possible_ne_points(col_evs):
         for row_number in min_indexes:
             row_possible_ne_points.add((row_number, col_number))
 
-
     return col_possible_ne_points, row_possible_ne_points
 
 
@@ -160,7 +158,7 @@ def create_heatmap(pot_size=1, bet_size=1):
 
     cmap = sns.color_palette("rocket")
 
-    fig, ax = plt.subplots(figsize=(20,10))
+    fig, ax = plt.subplots(figsize=(20, 10))
 
     sns.heatmap(
         data=col_evs,
@@ -174,7 +172,10 @@ def create_heatmap(pot_size=1, bet_size=1):
 
     ax.invert_yaxis()
     ax.set_yticklabels(ax.get_yticklabels(), rotation=90)
-    ax.set(xlabel="Column player minimum hand strength", ylabel="Row player minimum hand strength")
+    ax.set(
+        xlabel="Column player minimum hand strength",
+        ylabel="Row player minimum hand strength",
+    )
     cbar = ax.collections[0].colorbar
     cbar.set_label("Col EV")
 
@@ -217,28 +218,38 @@ def create_heatmap(pot_size=1, bet_size=1):
 
     return fig
 
+
 def graphviz_chart():
     # Create a new directed graph
-    dot = Digraph(graph_attr={'rankdir':'LR'})
+    dot = Digraph(graph_attr={"rankdir": "LR"})
 
     # Add nodes
-    dot.node('rpc', "Row player's choice")
-    dot.node('cpw1', 'Column player wins', shape='box', style='filled', fillcolor='orange')
-    dot.node('rpw1', 'Row player wins', shape='box', style='filled', fillcolor='lightblue')
-    dot.node('cpc', "Column player's choice")
-    dot.node('sd', 'Showdown')
-    dot.node('cpw2', 'Column player wins', shape='box', style='filled', fillcolor='orange')
-    dot.node('rpw2', 'Row player wins', shape='box', style='filled', fillcolor='lightblue')
+    dot.node("rpc", "Row player's choice")
+    dot.node(
+        "cpw1", "Column player wins", shape="box", style="filled", fillcolor="orange"
+    )
+    dot.node(
+        "rpw1", "Row player wins", shape="box", style="filled", fillcolor="lightblue"
+    )
+    dot.node("cpc", "Column player's choice")
+    dot.node("sd", "Showdown")
+    dot.node(
+        "cpw2", "Column player wins", shape="box", style="filled", fillcolor="orange"
+    )
+    dot.node(
+        "rpw2", "Row player wins", shape="box", style="filled", fillcolor="lightblue"
+    )
 
     # Add edges
-    dot.edge('rpc', 'cpw1', label='Fold')
-    dot.edge('rpc', 'cpc', label='Bet')
-    dot.edge('cpc', 'rpw1', label='Fold')
-    dot.edge('cpc', 'sd', label='Call')
-    dot.edge('sd', 'cpw2', label='Column player has better hand')
-    dot.edge('sd', 'rpw2', label='Row player has better hand')
+    dot.edge("rpc", "cpw1", label="Fold")
+    dot.edge("rpc", "cpc", label="Bet")
+    dot.edge("cpc", "rpw1", label="Fold")
+    dot.edge("cpc", "sd", label="Call")
+    dot.edge("sd", "cpw2", label="Column player has better hand")
+    dot.edge("sd", "rpw2", label="Row player has better hand")
 
     return dot
+
 
 def run_st():
     st.markdown("""
@@ -295,9 +306,8 @@ def run_st():
                 Basically playing Nash Equilibrium is safe way to play and it maximizes the winning against perfect opponents. But against worse opponents you can win more by exploiting them, but you are also open to being exploited yourself.
                 """)
 
-    st.write(
-        "[Source code](https://github.com/popsu/poker-ne-streamlit)"
-    )
+    st.write("[Source code](https://github.com/popsu/poker-ne-streamlit)")
+
 
 if __name__ == "__main__":
     run_st()
