@@ -18,6 +18,7 @@
 	},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
+  // TODO fix this, since now we're using UV
 	"postCreateCommand": "pip3 install -r requirements.txt",
 	// https://github.com/microsoft/vscode/issues/110050#issuecomment-1008467861
 	// This env file is used in exec-devcontainer.sh script
